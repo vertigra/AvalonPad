@@ -1,59 +1,58 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace AvalonPad.Core.AvalonDock.ViewModels
+namespace AvalonPad.Core.AvalonDock.ViewModels;
+
+/// <summary>
+/// Базовая виев модель для документов в понимании Avalon Dock
+/// </summary>
+public partial class AvalonDocumentViewModel : ObservableObject
 {
+    [ObservableProperty]
+    public partial string ContentId { get; set; } = $"doc-{Guid.NewGuid()}";
+    private string title = string.Empty;
+
+    private const char modifiedChar = '*';
+
     /// <summary>
-    /// Базовая виев модель для документов в понимании Avalon Dock
+    /// Заголовок вкладки. Показывает «*», если есть несохранённые изменения.
     /// </summary>
-    public partial class AvalonDocumentViewModel : ObservableObject
+    public string Title
     {
-        [ObservableProperty]
-        public partial string ContentId { get; set; } = $"doc-{Guid.NewGuid()}";
-        private string title = string.Empty;
-
-        private const char modifiedChar = '*';
-
-        /// <summary>
-        /// Заголовок вкладки. Показывает «*», если есть несохранённые изменения.
-        /// </summary>
-        public string Title
+        get  
         {
-            get  
-            {
-                //предотвращает задваивание символа *
-                if (title.EndsWith(modifiedChar))
-                    return title;
+            //предотвращает задваивание символа *
+            if (title.EndsWith(modifiedChar))
+                return title;
 
-                return IsModified ? $"{title} {modifiedChar}" : title;
-            }
-            set
-            {
-                if (SetProperty(ref title, value))
-                    OnPropertyChanged(nameof(Title));
-            }
+            return IsModified ? $"{title} {modifiedChar}" : title;
         }
-
-        [ObservableProperty]
-        public partial string ToolTip { get; set; } = string.Empty;
-
-        [ObservableProperty]
-        public partial bool IsActive { get; set; }
-
-        /// <summary>
-        /// При изменении IsModified = true в Title добавиться *
-        /// </summary>
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(Title))]
-        public partial bool IsModified { get; set; }
-
-        /// <summary>
-        /// Сохранить документ. Возвращает false при отмене.
-        /// </summary>
-        public virtual bool SaveToFile() => false;
-
-        /// <summary>
-        /// Подтвердить закрытие. Возвращает false, чтобы отменить.
-        /// </summary>
-        public virtual bool ConfirmClose() => true;
+        set
+        {
+            if (SetProperty(ref title, value))
+                OnPropertyChanged(nameof(Title));
+        }
     }
+
+    [ObservableProperty]
+    public partial string ToolTip { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool IsActive { get; set; }
+
+    /// <summary>
+    /// При изменении IsModified = true в Title добавиться *
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Title))]
+    public partial bool IsModified { get; set; }
+
+    /// <summary>
+    /// Сохранить документ. Возвращает false при отмене.
+    /// </summary>
+    public virtual bool SaveToFile() => false;
+
+    /// <summary>
+    /// Подтвердить закрытие. Возвращает false, чтобы отменить.
+    /// </summary>
+    public virtual bool ConfirmClose() => true;
 }

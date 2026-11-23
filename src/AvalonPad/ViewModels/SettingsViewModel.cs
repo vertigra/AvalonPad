@@ -8,7 +8,7 @@ using System.ComponentModel;
 
 namespace AvalonPad.ViewModels;
 
-public class SettingsViewModel : BaseDocumentViewModel, IRecipient<OpenSettingsMessage>
+public sealed class SettingsViewModel : BaseDocumentViewModel, IRecipient<OpenSettingsMessage>
 {
     public ISettingsService SettingsService { get; }
 

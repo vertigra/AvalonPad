@@ -54,7 +54,6 @@ public class AppPathService : IAppPathService
         }
     }
 
-    
     public string AppDataDirectory => mAppDataDirectory;
 
     public string SettingsFileName => "appsettings.json";
