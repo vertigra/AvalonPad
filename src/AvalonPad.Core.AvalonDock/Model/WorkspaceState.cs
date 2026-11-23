@@ -1,0 +1,9 @@
+﻿namespace AvalonPad.Core.AvalonDock.Model
+{
+    /// <summary>Рабочее состояние приложения — список открытых документов.</summary>
+    public sealed class WorkspaceState
+    {
+        public List<WorkspaceDocument> Documents { get; set; } = [];
+        public DateTime SavedAt { get; set; }
+    }
+}
