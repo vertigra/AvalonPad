@@ -6,64 +6,63 @@ using CommunityToolkit.Mvvm.Messaging;
 using System;
 using System.ComponentModel;
 
-namespace AvalonPad.ViewModels
+namespace AvalonPad.ViewModels;
+
+public class SettingsViewModel : BaseDocumentViewModel, IRecipient<OpenSettingsMessage>
 {
-    public class SettingsViewModel : BaseDocumentViewModel, IRecipient<OpenSettingsMessage>
+    public ISettingsService SettingsService { get; }
+
+    private readonly IDockWindowService mDockWindowService;
+
+    private readonly ILogService<SettingsViewModel> mLogService;
+
+    public SettingsViewModel(ISettingsService settingsService, IDockWindowService dockWindowService, IMessenger messenger, ILogService<SettingsViewModel> logService, IDialogService dialogService) : base(dialogService)
     {
-        public ISettingsService SettingsService { get; }
+        SettingsService = settingsService;
+        mDockWindowService = dockWindowService;
+        mLogService = logService;
 
-        private readonly IDockWindowService mDockWindowService;
+        Title = "Настройки";
+        ContentId = nameof(SettingsViewModel);
+        ToolTip = "Настройки приложения";
 
-        private readonly ILogService<SettingsViewModel> mLogService;
+        messenger.RegisterAll(this);
 
-        public SettingsViewModel(ISettingsService settingsService, IDockWindowService dockWindowService, IMessenger messenger, ILogService<SettingsViewModel> logService, IDialogService dialogService) : base(dialogService)
+        SettingsService.Current.PropertyChanged += SettingsChanged;
+    }
+
+    private void SettingsChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        IsModified = true;
+    }
+
+    public void Receive(OpenSettingsMessage message)
+    {
+        if (mDockWindowService.Documents.Contains(this))
+            mDockWindowService.ActivateDocument(this);
+        else
         {
-            SettingsService = settingsService;
-            mDockWindowService = dockWindowService;
-            mLogService = logService;
-
-            Title = "Настройки";
-            ContentId = nameof(SettingsViewModel);
-            ToolTip = "Настройки приложения";
-
-            messenger.RegisterAll(this);
-
-            SettingsService.Current.PropertyChanged += SettingsChanged;
+            mDockWindowService.OpenDocument(this);
+            mDockWindowService.ActivateDocument(this);
         }
+    }
 
-        private void SettingsChanged(object? sender, PropertyChangedEventArgs e)
+    /// <summary>
+    /// Настройки сохраняются автоматически через ISettingsService при изменении свойств.
+    /// Команда "Сохранить" в MainViewModel просто вызовет этот метод, который сбросит IsModified.
+    /// </summary>
+    public override bool SaveToFile()
+    {
+        try
         {
-            IsModified = true;
+            SettingsService.Save(); 
+            IsModified = false;
         }
-
-        public void Receive(OpenSettingsMessage message)
+        catch(Exception ex)
         {
-            if (mDockWindowService.Documents.Contains(this))
-                mDockWindowService.ActivateDocument(this);
-            else
-            {
-                mDockWindowService.OpenDocument(this);
-                mDockWindowService.ActivateDocument(this);
-            }
+            mLogService.LogError("Ошибка при сохранении настроек", ex);
         }
-
-        /// <summary>
-        /// Настройки сохраняются автоматически через ISettingsService при изменении свойств.
-        /// Команда "Сохранить" в MainViewModel просто вызовет этот метод, который сбросит IsModified.
-        /// </summary>
-        public override bool SaveToFile()
-        {
-            try
-            {
-                SettingsService.Save(); 
-                IsModified = false;
-            }
-            catch(Exception ex)
-            {
-                mLogService.LogError("Ошибка при сохранении настроек", ex);
-            }
-            
-            return true;
-        }
+        
+        return true;
     }
 }

@@ -1,7 +1,6 @@
 ﻿using AvalonDock;
 using AvalonPad.Core.AvalonDock.Model;
 using AvalonPad.Core.AvalonDock.Services;
-using AvalonPad.Core.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.ComponentModel;
 

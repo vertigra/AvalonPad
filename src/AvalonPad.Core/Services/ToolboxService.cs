@@ -1,8 +1,8 @@
-using AvalonPad.Core.AvalonDock.ViewModels;
 using AvalonDock.Layout;
+using AvalonPad.Core.AvalonDock.Services;
+using AvalonPad.Core.AvalonDock.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
-using AvalonPad.Core.AvalonDock.Services;
 
 namespace AvalonPad.Core.Services;
 

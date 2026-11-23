@@ -1,92 +1,90 @@
-﻿using AvalonPad.Core.AvalonDock.ViewModels;
-using AvalonDock.Core.Events;
+﻿using AvalonDock.Core.Events;
+using AvalonPad.Core.AvalonDock.EventArguments;
+using AvalonPad.Core.AvalonDock.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using AvalonPad.Core.AvalonDock.EventArguments;
-using AvalonPad.Core.AvalonDock.Services;
 
-namespace AvalonPad.Core.AvalonDock.Services
+namespace AvalonPad.Core.AvalonDock.Services;
+
+public interface IDockWindowService : INotifyPropertyChanged
 {
-    public interface IDockWindowService : INotifyPropertyChanged
-    {
-        ObservableCollection<AvalonDocumentViewModel> Documents { get; }
-        AvalonDocumentViewModel? ActiveDocument { get;  }
+    ObservableCollection<AvalonDocumentViewModel> Documents { get; }
+    AvalonDocumentViewModel? ActiveDocument { get;  }
 
-        void OpenDocument(AvalonDocumentViewModel doc);
-        void ActivateDocument(AvalonDocumentViewModel doc);
-        bool CloseDocument(AvalonDocumentViewModel doc);
+    void OpenDocument(AvalonDocumentViewModel doc);
+    void ActivateDocument(AvalonDocumentViewModel doc);
+    bool CloseDocument(AvalonDocumentViewModel doc);
+}
+
+public sealed partial class DockWindowService : ObservableObject, IDockWindowService
+{
+    //private readonly IDockEventBinder mDockEventBinder;
+    private readonly ILogger<DockWindowService> mLogger;
+
+    public DockWindowService(IDockEventBinder dockEventBinder, ILogger<DockWindowService> logger)
+    {
+        mLogger = logger;
+
+        dockEventBinder.ActiveContentChanged += OnActiveContentChanged;
+        dockEventBinder.DocumentClosing += OnDocumentClosing;
     }
 
-    public sealed partial class DockWindowService : ObservableObject, IDockWindowService
+    public ObservableCollection<AvalonDocumentViewModel> Documents { get; } = [];
+
+    [ObservableProperty]
+    public partial AvalonDocumentViewModel? ActiveDocument { get; private set; }
+
+    partial void OnActiveDocumentChanged(AvalonDocumentViewModel? value)
     {
-        //private readonly IDockEventBinder mDockEventBinder;
-        private readonly ILogger<DockWindowService> mLogger;
+        mLogger.LogTrace($"Активный документ {value?.Title ?? "Title не определен"}");
+    }
 
-        public DockWindowService(IDockEventBinder dockEventBinder, ILogger<DockWindowService> logger)
+    public void OpenDocument(AvalonDocumentViewModel doc)
+    {
+        if (Documents.Contains(doc))
         {
-            mLogger = logger;
-
-            dockEventBinder.ActiveContentChanged += OnActiveContentChanged;
-            dockEventBinder.DocumentClosing += OnDocumentClosing;
+            ActivateDocument(doc);
+            return;
         }
 
-        public ObservableCollection<AvalonDocumentViewModel> Documents { get; } = [];
+        Documents.Add(doc);
+    }
 
-        [ObservableProperty]
-        public partial AvalonDocumentViewModel? ActiveDocument { get; private set; }
+    public void ActivateDocument(AvalonDocumentViewModel doc)
+    {
+        ActiveDocument = doc;
+        doc.IsActive = true;
+    }
 
-        partial void OnActiveDocumentChanged(AvalonDocumentViewModel? value)
+    public bool CloseDocument(AvalonDocumentViewModel doc)
+    {
+        if (!doc.ConfirmClose())
+            return false;
+
+        Documents.Remove(doc);
+        return true;
+    }
+
+    private void OnActiveContentChanged(object? sender, ActiveContentChangedEventArgs e)
+    {
+        if (e.NewContent is AvalonDocumentViewModel doc)
+            ActivateDocument(doc);
+    }
+
+    private void OnDocumentClosing(object? sender, DocumentCancelEventArgs e)
+    {
+        if (e.Document.Content is not AvalonDocumentViewModel doc) 
+            return;
+
+        if (!doc.ConfirmClose())
         {
-            mLogger.LogTrace($"Активный документ {value?.Title ?? "Title не определен"}");
+            e.Cancel = true; // Отменяем закрытие в AvalonDock
+            return;
         }
 
-        public void OpenDocument(AvalonDocumentViewModel doc)
-        {
-            if (Documents.Contains(doc))
-            {
-                ActivateDocument(doc);
-                return;
-            }
-
-            Documents.Add(doc);
-        }
-
-        public void ActivateDocument(AvalonDocumentViewModel doc)
-        {
-            ActiveDocument = doc;
-            doc.IsActive = true;
-        }
-
-        public bool CloseDocument(AvalonDocumentViewModel doc)
-        {
-            if (!doc.ConfirmClose())
-                return false;
-
-            Documents.Remove(doc);
-            return true;
-        }
-
-        private void OnActiveContentChanged(object? sender, ActiveContentChangedEventArgs e)
-        {
-            if (e.NewContent is AvalonDocumentViewModel doc)
-                ActivateDocument(doc);
-        }
-
-        private void OnDocumentClosing(object? sender, DocumentCancelEventArgs e)
-        {
-            if (e.Document.Content is not AvalonDocumentViewModel doc) 
-                return;
-
-            if (!doc.ConfirmClose())
-            {
-                e.Cancel = true; // Отменяем закрытие в AvalonDock
-                return;
-            }
-
-            // Если согласился - AvalonDock сам закроет, но нужно удалить из коллекции
-            Documents.Remove(doc);
-        }
+        // Если согласился - AvalonDock сам закроет, но нужно удалить из коллекции
+        Documents.Remove(doc);
     }
 }
