@@ -28,19 +28,11 @@ public partial class App : Application
     public App()
     {
         AppPathService appPathService = new();
-        //Загружает сервис с настройками по умолчаниюю
+        
         SettingsService settingsService = new(appPathService);
-
-        // 1. Читаем конфигурацию из appsettings.json
-        //    Пути храняться в сервисе, и не меняются пользователем
-        /*var configuration = new ConfigurationBuilder()
-            .SetBasePath(settingsService.SettingsDirectory)
-            .AddJsonFile(settingsService.SettingsFileName, optional: true, reloadOnChange: true)
-            .Build();*/
 
         try
         {
-            //пробуем загрузить настройки, ошибки при чтении получаем в массиве
             mErrorConfigProperties = settingsService.Load();
         }
         catch(Exception ex)
@@ -87,7 +79,6 @@ public partial class App : Application
             {
                 services.AddSingleton<IAppPathService>(appPathService);
                 services.AddSingleton<ISettingsService>(settingsService);
-                //services.AddSingleton<IConfiguration>(configuration);
 
                 // Serilog.ILogger — глобальный логер
                 services.AddSingleton(Log.Logger);
