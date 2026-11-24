@@ -22,7 +22,7 @@
                  HorizontalScrollBarVisibility="Auto"
                  TextWrapping="Wrap"
                  FontFamily="Consolas"
-                 FontSize="14"
+                 FontSize="{Binding SettingsService.Current.EditorFontSize}"
                  Text="{Binding Content, UpdateSourceTrigger=PropertyChanged}" />
     </Grid>
 </UserControl>

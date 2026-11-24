@@ -37,11 +37,6 @@ public sealed partial class AppSettings : ObservableObject
     [ObservableProperty]
     public partial int EditorFontSize { get; set; } = 14;
 
-
-    [Description("Показывать номера строк (true/false)")]
-    [ObservableProperty]
-    public partial bool ShowLineNumbers { get; set; } = true;
-
     // ===== ЛОГИ: ИНФРАСТРУКТУРА =====
 
     [Description("Путь к файлу логов относительно папки приложения")]

@@ -5,6 +5,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            
         </Grid.RowDefinitions>
 
         <!-- Заголовок + кнопка Сохранить -->
@@ -14,25 +16,18 @@
                        Text="Настройки приложения" 
                        DockPanel.Dock="Left"
                        VerticalAlignment="Center" />
-
-            <!-- Кнопка привязана к SaveFileCommand из MainViewModel через DataContext окна 
-                 Это гавно-->
-            <Button Content="Сохранить"
-                    Padding="12,4"
-                    Margin="8,0,0,0"
-                    Command="{Binding DataContext.SaveFileCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                    DockPanel.Dock="Left" />
         </DockPanel>
 
         <!-- Настройки -->
         <ScrollViewer Grid.Row="1">
-            <StackPanel Width="500" HorizontalAlignment="Left">
+            <StackPanel Width="800" HorizontalAlignment="Left">
 
                 <!-- Редактор -->
                 <GroupBox Header="Редактор" Padding="12" Margin="0,0,0,8">
                     <StackPanel>
                         <Label Content="Шрифт:" />
-                        <TextBox  Margin="0,0,0,12" 
+                        <TextBox  Margin="0,0,0,12"
+                                  
                                   Text="{Binding SettingsService.Current.EditorFontFamily, 
                                                  Mode=TwoWay, 
                                                  UpdateSourceTrigger=PropertyChanged}"  />
@@ -50,33 +45,53 @@
                     <StackPanel>
                         <Label Content="Уровень логов (UI):" />
                         <TextBox Margin="0,0,0,12"
+                                 IsEnabled="False"
                                  Text="{Binding SettingsService.Current.OutputLogLevel, 
                                                 Mode=TwoWay,
                                                 UpdateSourceTrigger=PropertyChanged}"  />
 
                         <Label Content="Уровень логов (Глобально):" />
-                        <TextBox Margin="0,0,0,12" 
+                        <TextBox Margin="0,0,0,12"
+                                 IsEnabled="False"
                                  Text="{Binding SettingsService.Current.GlobalLogLevel, 
                                                 Mode=TwoWay, 
                                                 UpdateSourceTrigger=PropertyChanged}"  />
 
-                        <Label Content="Путь к файлу логов:" />
+                        <Label Content="Путь к файлу логов относительно папки приложения:" />
                         <TextBox Margin="0,0,0,12" 
-                                 IsReadOnly="True" 
-                                 Text="{Binding SettingsService.Current.LogFilePath, 
-                                                Mode=TwoWay, 
-                                                UpdateSourceTrigger=PropertyChanged}"  />
+                                 IsReadOnly="True"
+                                 IsEnabled="False"
+                                 Text="{Binding SettingsService.Current.LogFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
 
-                        <Label Content="Дней хранения:" />
+                        <Label Content="Количество дней хранения логов (после удаляются):" />
                         <TextBox Margin="0,0,0,12" 
-                                 IsReadOnly="True" 
+                                 IsReadOnly="True"
                                  Text="{Binding SettingsService.Current.RetainedFileCountLimit, 
                                                 Mode=TwoWay, 
                                                 UpdateSourceTrigger=PropertyChanged}"  />
+
+                        <Label Content="Шаблон вывода логов в файл (Serilog outputTemplate):" />
+                        <TextBox Margin="0,0,0,12" 
+                                 IsReadOnly="True"
+                                 IsEnabled="False"
+                                 Text="{Binding SettingsService.Current.FileLogTemplate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
                     </StackPanel>
                 </GroupBox>
-
             </StackPanel>
+            
         </ScrollViewer>
+
+
+        <DockPanel Grid.Row="2" 
+                   Margin="0,10,0,0"
+                   LastChildFill="False">
+
+            <Button Content="Сохранить"
+                    Padding="12,4"
+                    Command="{Binding DataContext.SaveFileCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                    DockPanel.Dock="Right" />
+
+        </DockPanel>
+        
     </Grid>
 </UserControl>

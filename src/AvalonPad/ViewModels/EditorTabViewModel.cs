@@ -12,12 +12,15 @@ namespace AvalonPad.ViewModels;
 /// </summary>
 public sealed partial class EditorTabViewModel : BaseDocumentViewModel
 {
+    public ISettingsService SettingsService { get; }
     private readonly IFileService mFileService;
     private readonly IDialogService mDialogService;
     private readonly ILogService<EditorTabViewModel> mLogService;
 
-    public EditorTabViewModel(IFileService fileService, IDialogService dialogService, ILogService<EditorTabViewModel> logService) : base(dialogService)
+    public EditorTabViewModel(ISettingsService settingsService, IFileService fileService, IDialogService dialogService, ILogService<EditorTabViewModel> logService) : base(dialogService)
     {
+        SettingsService = settingsService;
+
         mFileService = fileService;
         mDialogService = dialogService;
         mLogService = logService;
