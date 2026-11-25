@@ -15,13 +15,14 @@
                    Text="{Binding Title}"/>
 
         <!-- Редактор содержимого -->
+        <!-- Tекст автоматически переносится на новую строку, он никогда не превысит ширину поля поэтому HorizontalScrollBarVisibility="Disabled" -->
         <TextBox Grid.Row="1"
                  AcceptsReturn="True"
                  AcceptsTab="True"
                  VerticalScrollBarVisibility="Auto"
-                 HorizontalScrollBarVisibility="Auto"
+                 HorizontalScrollBarVisibility="Disabled"
                  TextWrapping="Wrap"
-                 FontFamily="Consolas"
+                 FontFamily="{Binding SettingsService.Current.EditorFontFamily}"
                  FontSize="{Binding SettingsService.Current.EditorFontSize}"
                  Text="{Binding Content, UpdateSourceTrigger=PropertyChanged}" />
     </Grid>

@@ -4,7 +4,10 @@ using AvalonPad.Core.ViewModels;
 using AvalonPad.Messages;
 using CommunityToolkit.Mvvm.Messaging;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
+using System.Windows.Media;
 
 namespace AvalonPad.ViewModels;
 
@@ -31,10 +34,11 @@ public sealed class SettingsViewModel : BaseDocumentViewModel, IRecipient<OpenSe
         SettingsService.Current.PropertyChanged += SettingsChanged;
     }
 
-    private void SettingsChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        IsModified = true;
-    }
+    /// <summary>Список доступных шрифтов системы (для ComboBox'а настроек).</summary>
+    public IReadOnlyList<string> AvailableFonts { get; } = [.. Fonts.SystemFontFamilies.Select(f => f.Source).OrderBy(s => s)];
+
+    /// <summary>Доступные размеры шрифта (pt) для ComboBox'а настроек.</summary>
+    public IReadOnlyList<int> AvailableFontSizes { get; } = [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 28, 32, 36, 48, 72];
 
     public void Receive(OpenSettingsMessage message)
     {
@@ -64,5 +68,10 @@ public sealed class SettingsViewModel : BaseDocumentViewModel, IRecipient<OpenSe
         }
         
         return true;
+    }
+
+    private void SettingsChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        IsModified = true;
     }
 }

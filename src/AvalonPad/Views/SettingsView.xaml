@@ -26,17 +26,21 @@
                 <GroupBox Header="Редактор" Padding="12" Margin="0,0,0,8">
                     <StackPanel>
                         <Label Content="Шрифт:" />
-                        <TextBox  Margin="0,0,0,12"
-                                  
-                                  Text="{Binding SettingsService.Current.EditorFontFamily, 
-                                                 Mode=TwoWay, 
-                                                 UpdateSourceTrigger=PropertyChanged}"  />
+                        <ComboBox Margin="0,0,0,12"
+                                  ItemsSource="{Binding AvailableFonts}"
+                                  SelectedItem="{Binding SettingsService.Current.EditorFontFamily, Mode=TwoWay}">
+                            <ComboBox.ItemContainerStyle>
+                                <Style TargetType="ComboBoxItem">
+                                    <Setter Property="FontFamily" Value="{Binding}" />
+                                </Style>
+                            </ComboBox.ItemContainerStyle>
+                        </ComboBox>
 
                         <Label Content="Размер шрифта:" />
-                        <TextBox Margin="0,0,0,12"
-                                 Text="{Binding SettingsService.Current.EditorFontSize, 
-                                                Mode=TwoWay, 
-                                                UpdateSourceTrigger=PropertyChanged}" />
+                        <ComboBox Margin="0,0,0,12"
+                                  ItemsSource="{Binding AvailableFontSizes}"
+                                  SelectedItem="{Binding SettingsService.Current.EditorFontSize, Mode=TwoWay}" />
+                 
                     </StackPanel>
                 </GroupBox>
 
