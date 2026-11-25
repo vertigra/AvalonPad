@@ -77,9 +77,9 @@ public sealed partial class MainViewModel : ObservableObject, IWindowLifecycleAw
 
     // --- Жизненный цикл ---
 
-    public void OnWindowLoaded() => mPersistenceService.Restore();
+    public void OnWindowLoaded(Window window) => mPersistenceService.Restore(window);
 
-    public void OnWindowClosed() => mPersistenceService.Save();
+    public void OnWindowClosed(Window window) => mPersistenceService.Save(window);
 
     // --- Обработчики ---
 

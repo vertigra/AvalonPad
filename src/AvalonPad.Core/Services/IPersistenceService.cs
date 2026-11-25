@@ -1,4 +1,6 @@
-﻿namespace AvalonPad.Core.Services;
+﻿using System.Windows;
+
+namespace AvalonPad.Core.Services;
 
 /// <summary>
 /// Единый сервис персистентности приложения. Инкапсулирует:
@@ -16,10 +18,10 @@ public interface IPersistenceService
     event EventHandler? RestoreHappened;
 
     /// <summary>Восстановить всё состояние при старте приложения включая состояние, вызывает событие RestoreHappened</summary>
-    void Restore();
+    void Restore(Window window);
 
     /// <summary>Сохранить всё состояние (выход, явная команда).</summary>
-    void Save();
+    void Save(Window window);
 
     /// <summary>Запланировать отложенное сохранение layout (debounce 500мс).</summary>
     void ScheduleLayoutSave();

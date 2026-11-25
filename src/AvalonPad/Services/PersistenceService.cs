@@ -65,8 +65,10 @@ public sealed class PersistenceService : IPersistenceService
         ScheduleLayoutSave();
     }
 
-    public void Save()
+    public void Save(Window window)
     {
+        SaveWindowState(window);
+
         try 
         { 
             SaveLayout(); 
@@ -87,11 +89,31 @@ public sealed class PersistenceService : IPersistenceService
     }
 
 
-    public void Restore()
+    public void Restore(Window window)
     {
+        RestoreWindowState(window);
         NotifyRestoreCompleted();
         RestoreWorkspace();
         RestoreLayout();
+    }
+
+    private void SaveWindowState(Window window)
+    {
+        var current = mSettingsService.Current;
+        if (window.WindowState == WindowState.Normal)
+        {
+            current.WindowWidth = window.Width;
+            current.WindowHeight = window.Height;
+        }
+        current.IsMaximized = window.WindowState == WindowState.Maximized;
+    }
+
+    private void RestoreWindowState(Window window)
+    {
+        var current = mSettingsService.Current;
+        window.Width = current.WindowWidth;
+        window.Height = current.WindowHeight;
+        window.WindowState = current.IsMaximized ? WindowState.Maximized : WindowState.Normal;
     }
 
     private void RestoreWorkspace()

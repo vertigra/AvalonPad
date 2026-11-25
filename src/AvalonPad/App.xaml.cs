@@ -1,9 +1,11 @@
+using AvalonPad.Core.AvalonDock.Services;
+using AvalonPad.Core.Services;
 using AvalonPad.Core.Services.AvalonDock;
-using AvalonPad.Views;
 using AvalonPad.Extensions;
 using AvalonPad.Factories;
 using AvalonPad.Services;
 using AvalonPad.ViewModels;
+using AvalonPad.Views;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,10 +15,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows;
-using AvalonPad.Core.Services;
-using AvalonPad.Core.AvalonDock.Services;
-using System.Windows.Navigation;
-using AvalonPad.Core.Models;
 
 namespace AvalonPad;
 
@@ -151,14 +149,8 @@ public partial class App : Application
     protected override async void OnStartup(StartupEventArgs e)
     {
         await mHost.StartAsync();
-
-        _ = mHost.Services.GetRequiredService<SettingsViewModel>();
-
-        MainWindow mainWindow = mHost.Services.GetRequiredService<MainWindow>();
-        AppSettings settings = mHost.Services.GetRequiredService<ISettingsService>().Current;
-
-        mainWindow = RestoreMainWindowState(mainWindow, settings);
-        mainWindow.Show();
+        MainWindow window = mHost.Services.GetRequiredService<MainWindow>();
+        window.Show();
 
         base.OnStartup(e);
     }
@@ -166,55 +158,9 @@ public partial class App : Application
     protected override async void OnExit(ExitEventArgs e)
     {
         await mHost.StopAsync();
-
-        var settings = mHost.Services.GetRequiredService<ISettingsService>().Current;
-        var mainWindow = mHost.Services.GetRequiredService<MainWindow>();
-
-        SaveMainWindowState(mainWindow, settings);
-        
         mHost.Dispose();
         Log.CloseAndFlush();
+
         base.OnExit(e);
-    }
-
-    /// <summary>
-    /// Применяем сохранённую геометрию окна ДО Show — иначе будет визуальный
-    /// скачок: окно мелькнёт на дефолтных размерах из XAML (1100x700), потом
-    /// перестроится на сохранённые. Применение до Show убирает этот эффект.
-    /// </summary>
-    private void SaveMainWindowState(MainWindow mainWindow, AppSettings currentSettings)
-    {
-        // Сохраняем геометрию главного окна в настройки.
-        // Ответственность App как composition root: на старте применили,
-        // на выходе — сохраняем. WindowLifecycleService к этому не относится,
-        // он занимается только подпиской на Loaded/Closed и регистрацией
-        // DockingManager.
-        //
-        // Пишем Width/Height только при WindowState == Normal, иначе в настройки
-        // уйдут максимизированные размеры экрана. При максимизированном закрытии
-        // оставляем предыдущие Normal-размеры.
-        try
-        {
-            if (mainWindow.WindowState == WindowState.Normal)
-            {
-                currentSettings.WindowWidth = mainWindow.Width;
-                currentSettings.WindowHeight = mainWindow.Height;
-            }
-            currentSettings.IsMaximized = mainWindow.WindowState == WindowState.Maximized;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Не удалось сохранить геометрию окна");
-        }
-
-    }
-
-    private static MainWindow RestoreMainWindowState(MainWindow mainWindow, AppSettings currentSettings)
-    {
-        mainWindow.Width = currentSettings.WindowWidth;
-        mainWindow.Height = currentSettings.WindowHeight;
-        mainWindow.WindowState = currentSettings.IsMaximized ? WindowState.Maximized : WindowState.Normal;
-
-        return mainWindow;
     }
 }

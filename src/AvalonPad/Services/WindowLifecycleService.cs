@@ -11,8 +11,8 @@ namespace AvalonPad.Services;
 /// </summary>
 public interface IWindowLifecycleAware
 {
-    void OnWindowLoaded();
-    void OnWindowClosed();
+    void OnWindowLoaded(Window window);
+    void OnWindowClosed(Window window);
 }
 
 /// <summary>
@@ -53,7 +53,7 @@ public sealed class WindowLifecycleService : IWindowLifecycleService
 
             // Если VM реализует IWindowLifecycleAware — уведомляем о загрузке
             if (window.DataContext is IWindowLifecycleAware aware)
-                aware.OnWindowLoaded();
+                aware.OnWindowLoaded(window);
 
             // Отписываемся — обработчик нужен только один раз
             window.Loaded -= OnLoaded;
@@ -62,7 +62,7 @@ public sealed class WindowLifecycleService : IWindowLifecycleService
         void OnClosed(object? sender, EventArgs e)
         {       
             if (window.DataContext is IWindowLifecycleAware aware)
-                aware.OnWindowClosed();
+                aware.OnWindowClosed(window);
 
             // Чистим ссылку, чтобы не держать DockingManager в памяти
             mDockingManagerProvider.Manager = null;
