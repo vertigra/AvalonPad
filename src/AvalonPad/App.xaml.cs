@@ -149,6 +149,13 @@ public partial class App : Application
     protected override async void OnStartup(StartupEventArgs e)
     {
         await mHost.StartAsync();
+
+        // Eager-resolve синглтон SettingsViewModel — конструктор регистрирует
+        // обработчик OpenSettingsMessage в WeakReferenceMessenger. Без этого
+        // команда "Настройки → Параметры" будет молча терять сообщение,
+        // если в workspace.json не было сохранённой вкладки настроек.
+        _ = mHost.Services.GetRequiredService<SettingsViewModel>();
+
         MainWindow window = mHost.Services.GetRequiredService<MainWindow>();
         window.Show();
 
