@@ -20,9 +20,18 @@ public class BaseDocumentViewModel : AvalonDocumentViewModel
 
         var result = mDialogService.ShowQuestion($"Сохранить изменения в «{Title}»?", "Несохранённые изменения");
 
-        if (result == MessageBoxResult.Yes)
-            return SaveToFile();
+        return result switch
+        {
+            // Сохранить и закрыть. Если пользователь отменил диалог сохранения
+            // (SaveFileDialog вернул null), SaveToFile() вернёт false —
+            // и закрытие документа тоже отменится.
+            MessageBoxResult.Yes => SaveToFile(),
 
-        return result != MessageBoxResult.Cancel;
+            // Закрыть без сохранения — изменения теряются сознательно.
+            MessageBoxResult.No => true,
+
+            // Отмена (или закрытие диалога крестиком) — документ остаётся открытым.
+            _ => false,
+        };
     }
 }
