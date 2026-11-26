@@ -18,7 +18,7 @@ public class BaseDocumentViewModel : AvalonDocumentViewModel
         if (!IsModified)
             return true;
 
-        var result = mDialogService.ShowQuestion($"Сохранить изменения в «{Title}»?", "Несохранённые изменения");
+        var result = mDialogService.ShowYesNoCancel($"Сохранить изменения в «{Title}»?", "Несохранённые изменения");
 
         return result switch
         {
