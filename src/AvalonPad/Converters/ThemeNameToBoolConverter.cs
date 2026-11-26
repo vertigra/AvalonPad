@@ -15,11 +15,12 @@ public sealed class ThemeNameToBoolConverter : IMultiValueConverter
 {
     public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
     {
-        // values[0] = CurrentThemeName (из MainViewModel)
-        // values[1] = Name (из ThemeInfo — DataContext MenuItem)
-        if (values.Length < 2) return false;
+        if (values.Length < 2) 
+            return false;
+
         var current = values[0] as string;
         var candidate = values[1] as string;
+        
         return string.Equals(current, candidate, StringComparison.OrdinalIgnoreCase);
     }
 

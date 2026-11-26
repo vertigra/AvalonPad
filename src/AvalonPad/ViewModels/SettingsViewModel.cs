@@ -42,19 +42,18 @@ public sealed class SettingsViewModel : BaseDocumentViewModel, IRecipient<OpenSe
 
     public void Receive(OpenSettingsMessage message)
     {
+        //активируем если вкладка открыта
         if (mDockWindowService.Documents.Contains(this))
-            mDockWindowService.ActivateDocument(this);
-        else
         {
-            mDockWindowService.OpenDocument(this);
             mDockWindowService.ActivateDocument(this);
+            return;
         }
+        
+        mDockWindowService.OpenDocument(this);
+        mDockWindowService.ActivateDocument(this);
+        
     }
 
-    /// <summary>
-    /// Настройки сохраняются автоматически через ISettingsService при изменении свойств.
-    /// Команда "Сохранить" в MainViewModel просто вызовет этот метод, который сбросит IsModified.
-    /// </summary>
     public override bool SaveToFile()
     {
         try

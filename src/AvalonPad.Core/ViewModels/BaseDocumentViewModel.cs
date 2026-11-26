@@ -13,7 +13,6 @@ public class BaseDocumentViewModel : AvalonDocumentViewModel
         mDialogService = dialogService;
     }
 
-
     public override bool ConfirmClose()
     {
         if (!IsModified)

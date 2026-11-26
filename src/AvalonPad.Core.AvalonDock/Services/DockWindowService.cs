@@ -20,7 +20,6 @@ public interface IDockWindowService : INotifyPropertyChanged
 
 public sealed partial class DockWindowService : ObservableObject, IDockWindowService
 {
-    //private readonly IDockEventBinder mDockEventBinder;
     private readonly ILogger<DockWindowService> mLogger;
 
     public DockWindowService(IDockEventBinder dockEventBinder, ILogger<DockWindowService> logger)

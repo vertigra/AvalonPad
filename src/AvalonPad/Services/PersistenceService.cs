@@ -92,9 +92,10 @@ public sealed class PersistenceService : IPersistenceService
     public void Restore(Window window)
     {
         RestoreWindowState(window);
-        NotifyRestoreCompleted();
         RestoreWorkspace();
         RestoreLayout();
+
+        NotifyRestoreCompleted();
     }
 
     private void SaveWindowState(Window window)

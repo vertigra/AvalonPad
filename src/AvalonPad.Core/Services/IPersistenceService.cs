@@ -7,6 +7,7 @@ namespace AvalonPad.Core.Services;
 /// - сохранение/восстановление layout (layout.xml)
 /// - сохранение/восстановление workspace (workspace.json — список документов
 /// - debounced автосохранение layout при изменениях
+/// - сохранение размеров окна и состояния IsMaximized
 ///
 /// MainViewModel делегирует сюда всё — никаких путей к файлам и сериализации в VM.
 /// </summary>

@@ -119,7 +119,7 @@ public sealed partial class MainViewModel : ObservableObject, IWindowLifecycleAw
 
 
     [RelayCommand]
-    private void OpenFile() //=> mDocumentService.OpenFile();
+    private void OpenFile()
     {
         var path = mFileService.ShowOpenDialog();
         
@@ -127,9 +127,7 @@ public sealed partial class MainViewModel : ObservableObject, IWindowLifecycleAw
             return;
 
         // 1. Ищем среди открытых документов, приводя к EditorTabViewModel
-        var existing = mDockWindowService.Documents
-                                     .OfType<EditorTabViewModel>()
-                                     .FirstOrDefault(d => d.FilePath == path);
+        var existing = mDockWindowService.Documents.OfType<EditorTabViewModel>().FirstOrDefault(d => d.FilePath == path);
 
         if (existing != null)
         {

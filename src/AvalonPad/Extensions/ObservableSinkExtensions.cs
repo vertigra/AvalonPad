@@ -24,7 +24,9 @@ public sealed class ObservableSink : ILogEventSink
     {
         // Учитываем и статический минимум, и переключатель (если есть)
         var effectiveLevel = mLevelSwitch?.MinimumLevel ?? mMinimumLevel;
-        if (logEvent.Level < effectiveLevel) return;
+        
+        if (logEvent.Level < effectiveLevel) 
+            return;
 
         var message = logEvent.RenderMessage();
         var formatted = $"[{logEvent.Timestamp:HH:mm:ss}] [{logEvent.Level}] {message}";

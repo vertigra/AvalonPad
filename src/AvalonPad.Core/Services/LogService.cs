@@ -7,7 +7,6 @@ namespace AvalonPad.Core.Services;
 public interface ILogService
 {
     ObservableCollection<string> LogLines { get; }
-
     void Log(string message, LogEventLevel level = LogEventLevel.Information);
     void LogInformation(string message);
     void LogWarning(string message);

@@ -24,16 +24,12 @@ public sealed class DockEventBinder : IDockEventBinder
     public event EventHandler? LayoutChanged;
     
     private readonly IDockingManagerProvider mProvider;
-    private readonly ILogger<DockEventBinder> mLoggerService;
-    
     private IDockingManager? mDockingManager;
     private LayoutRoot? mLayoutRoot;
 
-    public DockEventBinder(IDockingManagerProvider provider, ILogger<DockEventBinder> logger)
+    public DockEventBinder(IDockingManagerProvider provider)
     {
         mProvider = provider;
-        mLoggerService = logger;
-
         mProvider.ManagerChanged += OnManagerChanged;
     }
 
