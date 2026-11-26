@@ -1,4 +1,5 @@
 using AvalonPad.Core.AvalonDock.Services;
+using AvalonPad.Core.Models;
 using AvalonPad.Core.Services;
 using AvalonPad.Core.Services.AvalonDock;
 using AvalonPad.Extensions;
@@ -127,6 +128,9 @@ public partial class App : Application
                 // Каталог документов: какие типы восстанавливать из workspace.json
                 // (PersistenceService конкретных типов не знает)
                 services.AddSingleton<IDocumentCatalog, DocumentCatalog>();
+
+                // Контракт модуля: Shell знает только интерфейс IAppModule
+                services.AddSingleton<IAppModule, AvalonPadModule>();
 
                 // Сервис по управлению документами
                 services.AddSingleton<IDockWindowService, DockWindowService>();

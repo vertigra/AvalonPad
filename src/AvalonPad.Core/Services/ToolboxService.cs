@@ -1,4 +1,5 @@
 using AvalonDock.Layout;
+using System;
 using AvalonPad.Core.AvalonDock.Services;
 using AvalonPad.Core.AvalonDock.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +11,9 @@ public interface IToolboxService
 {
     ObservableCollection<AvalonToolViewModel> Anchorables { get; }
     T Register<T>() where T : AvalonToolViewModel;
+
+    /// <summary>Необобщённая регистрация — для ToolRegistration из IAppModule.</summary>
+    AvalonToolViewModel Register(Type viewModelType);
     T? Get<T>() where T : AvalonToolViewModel;
     void Toggle<T>() where T : AvalonToolViewModel;
     void Show<T>() where T : AvalonToolViewModel;
@@ -43,6 +47,15 @@ public sealed class ToolboxService : IToolboxService
     public T Register<T>() where T : AvalonToolViewModel
     {
         var toolbox = mServices.GetRequiredService<T>();
+        if (!Anchorables.Contains(toolbox))
+            Anchorables.Add(toolbox);
+
+        return toolbox;
+    }
+
+    public AvalonToolViewModel Register(Type viewModelType)
+    {
+        var toolbox = (AvalonToolViewModel)mServices.GetRequiredService(viewModelType);
         if (!Anchorables.Contains(toolbox))
             Anchorables.Add(toolbox);
 

@@ -6,10 +6,9 @@
         xmlns:themes="clr-namespace:AvalonDock.Themes;assembly=AvalonDock.Themes.VS2013"
         xmlns:docking="clr-namespace:AvalonPad.Core.AvalonDock.Docking;assembly=AvalonPad.Core.AvalonDock"
         xmlns:styles="clr-namespace:AvalonPad.Core.AvalonDock.Styles;assembly=AvalonPad.Core.AvalonDock"
-        xmlns:local="clr-namespace:AvalonPad"
         xmlns:converters="clr-namespace:AvalonPad.Converters;assembly=AvalonPad.Shell"
         xmlns:vm="clr-namespace:AvalonPad.ViewModels"
-        Title="AvalonPad"
+        Title="{Binding AppTitle}"
         Height="700" Width="1100"
         WindowStartupLocation="CenterScreen"
         Background="#FFFFFF">
@@ -23,6 +22,26 @@
 
         <!-- Конвертер для отметки галочкой текущей темы в меню «Вид → Темы» -->
         <converters:ThemeNameToBoolConverter x:Key="ThemeNameToBoolConverter" />
+
+        <!-- Стиль для пунктов меню, построенных из MenuItemViewModel (Shell).
+             Header == null в модели — разделитель (шаблон заменяется на Separator). -->
+        <Style x:Key="ShellMenuItemStyle" TargetType="MenuItem">
+            <Setter Property="Header" Value="{Binding Header}" />
+            <Setter Property="Command" Value="{Binding Command}" />
+            <Setter Property="InputGestureText" Value="{Binding InputGesture}" />
+            <Setter Property="ItemsSource" Value="{Binding Children}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSeparator}" Value="True">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="MenuItem">
+                                <Separator Style="{StaticResource {x:Static MenuItem.SeparatorStyleKey}}" />
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
 
         <!-- StyleSelector для LayoutItem -->
         <styles:PanesStyleSelector x:Key="PanesStyleSelector">
@@ -53,26 +72,13 @@
 
         <!-- Меню -->
         <Menu Grid.Row="0" Background="#F0F0F0" Padding="4">
-            <MenuItem Header="_Файл">
-                <MenuItem Header="Новый документ"
-                          Command="{Binding OpenNewDocumentCommand}"
-                          InputGestureText="Ctrl+N" />
-                <MenuItem Header="Открыть файл..."
-                          Command="{Binding OpenFileCommand}"
-                          InputGestureText="Ctrl+O" />
-                <MenuItem Header="Сохранить"
-                          Command="{Binding SaveFileCommand}"
-                          InputGestureText="Ctrl+S" />
-                <MenuItem Header="Закрыть документ"
-                          Command="{Binding CloseDocumentCommand}"
-                          InputGestureText="Ctrl+W" />
-                <Separator />
-                <MenuItem Header="Выход" Command="{Binding ExitCommand}" />
-            </MenuItem>
-            <MenuItem Header="_Панели инструментов">
-                <MenuItem Header="Свойства"  Command="{Binding TogglePropertiesCommand}" />
-                <MenuItem Header="Вывод" Command="{Binding ToggleOutputCommand}" />
-            </MenuItem>
+            <!-- Пункты модуля + стандартные пункты Shell собираются в MainViewModel -->
+            <MenuItem Header="_Файл"
+                      ItemsSource="{Binding FileMenuItems}"
+                      ItemContainerStyle="{StaticResource ShellMenuItemStyle}" />
+            <MenuItem Header="_Панели инструментов"
+                      ItemsSource="{Binding ToolsMenuItems}"
+                      ItemContainerStyle="{StaticResource ShellMenuItemStyle}" />
             <MenuItem Header="_Настройки">
                 <MenuItem Header="Параметры"  Command="{Binding OpenSettingsCommand}" />
 

@@ -86,24 +86,27 @@ AvalonPad.Core.AvalonDock` — та же, Shell появится в процес
 Оболочка не знает содержимое приложений — она потребляет контракт:
 
 ```csharp
-// AvalonPad.Core
+// AvalonPad.Core (как реализовано на шаге 2б)
 public interface IAppModule
 {
     string AppTitle { get; }
-    IEnumerable<ToolRegistration>     Tools     { get; }  // панели
-    IEnumerable<DocumentRegistration> Documents { get; }  // типы документов
-    IEnumerable<MenuRegistration>     MenuItems { get; }  // меню и команды
+    IEnumerable<ToolRegistration> Tools     { get; }  // панели
+    IEnumerable<MenuRegistration> MenuItems { get; }  // меню и команды
 }
 ```
 
-- `MainViewModel` и `MainWindow` живут в Shell и **параметризованы**: меню
-  строится из `MenuItems`, панели — из `Tools`, документы — из `Documents`.
-- Фабрика документов — общий интерфейс `IDocumentViewModelFactory`
-  (образец: `EditorTabViewModelFactory`).
-- Открытие документа по команде меню идёт **через Shell**
-  (`DockWindowService.OpenDocument(registration)`), а не напрямую из команды
-  модуля: тогда сохранение в workspace и восстановление layout работают для
-  любого типа документа одинаково.
+- `MainViewModel` и `MainWindow` живут в Shell и **параметризованы**: группы
+  «Файл»/«Панели инструментов» строятся из `MenuItems` (обёртка
+  `MenuItemViewModel`, разделитель — по `Header == null`), панели — из `Tools`
+  (`ToolboxService.Register(Type)`), заголовок окна — из `AppTitle`.
+- Документы — не через `IAppModule.Documents`, а через каталог
+  `IDocumentCatalog` (шаг 2а): знание о типах живёт в приложении, Shell видит
+  только `AvalonDocumentViewModel`. Обобщённая `IDocumentViewModelFactory`
+  не потребовалась.
+- Команда модуля открывает документ напрямую через Shell-сервис
+  `IDockWindowService.OpenDocument(...)`: сохранение в workspace и
+  восстановление работают для любого типа одинаково (тип записан как
+  `typeof(X).FullName` в `WorkspaceDocument`).
 - Модуль регистрируется в DI **до** восстановления workspace — иначе каталог
   документов пуст в момент restore.
 
@@ -163,12 +166,17 @@ public interface IAppModule
    и т.п.) — тогда код компилируется без правок; в XAML добавляются префиксы
    `shellvm`/`shellviews` с `assembly=AvalonPad.Shell` для переезжающих типов
    (DataTemplates в App.xaml, конвертеры в MainWindow.xaml).
-2. **Контракт и параметризация.** `IAppModule` в `AvalonPad.Core`;
-   редакторные команды (New/Open/Save) вырезаются из `MainViewModel` в модуль;
-   меню строится из `MenuItems`; `MainViewModel` и `MainWindow` переезжают в
-   Shell; вместе с ними — `PersistenceService`, у которого знание о конкретных
-   документах заменяется каталогом (интерфейс-фабрика по ContentId,
-   реализация — в каждом приложении).
+2. **Контракт и параметризация.** Шаг разделён на два подшага:
+   - **2а (выполнен):** `PersistenceService` переезжает в Shell; знание о
+     конкретных документах заменяется каталогом `IDocumentCatalog` +
+     `IPersistableDocument` (контракт — в `Core.AvalonDock`, реализация — в
+     приложении, регистрация — в `DocumentCatalog`).
+   - **2б (этот шаг):** `IAppModule` в `AvalonPad.Core`; редакторные команды
+     (New/Open) вырезаются из `MainViewModel` в модуль (`AvalonPadModule`);
+     «Сохранить»/«Закрыть» остаются в Shell — они работают с любым документом;
+     меню «Файл»/«Панели инструментов» — из `MenuItems` модуля, «Настройки» и
+     подменю «Темы» — статические в Shell; панели — из `Tools`;
+     `MainViewModel` и `MainWindow` переезжают в Shell.
 3. **Приложения схлопываются.** AdamPad/WindowPad: `App.xaml(.cs)` + модуль +
    свои документы/панели. Здесь создаются пустые `AdamPad.Core` /
    `WindowPad.Core` (csproj + ссылка на `AvalonPad.Core`) — прирост

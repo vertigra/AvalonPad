@@ -1,8 +1,9 @@
 using AvalonPad.Core.AvalonDock.Services;
 using AvalonPad.Core.AvalonDock.ViewModels;
 using AvalonPad.Core.Services.AvalonDock;
+using AvalonPad.Core.Models;
+using AvalonPad.Core.Services;
 using AvalonPad.Messages;
-using AvalonPad.Factories;
 using AvalonPad.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -13,7 +14,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
-using AvalonPad.Core.Services;
 using AvalonPad.Core.AvalonDock.Model;
 
 namespace AvalonPad.ViewModels;
@@ -27,9 +27,7 @@ public sealed partial class MainViewModel : ObservableObject, IWindowLifecycleAw
     private readonly IDockWindowService mDockWindowService;
     private readonly IPersistenceService mPersistenceService;
     private readonly ILogService<MainViewModel> mLogService;
-    private readonly IEditorTabViewModelFactory mEditorFactory;
-    private readonly IFileService mFileService;
-    private readonly IDialogService mDialogService;
+    private readonly IAppModule mModule;
     private readonly IMessenger mMessenger;
 
     #endregion
@@ -40,9 +38,7 @@ public sealed partial class MainViewModel : ObservableObject, IWindowLifecycleAw
         IDockWindowService dockWindowService,
         IPersistenceService persistenceService,
         ILogService<MainViewModel> logService,
-        IEditorTabViewModelFactory editorFactory,
-        IFileService fileService,
-        IDialogService dialogService,
+        IAppModule module,
         IMessenger messenger)
     {
         mToolboxService = toolboxService;
@@ -50,14 +46,21 @@ public sealed partial class MainViewModel : ObservableObject, IWindowLifecycleAw
         mDockWindowService = dockWindowService;
         mPersistenceService = persistenceService;
         mLogService = logService;
-        mEditorFactory = editorFactory;
-        mFileService = fileService;
-        mDialogService = dialogService;
+        mModule = module;
         mMessenger = messenger;
 
-        // Регистрируем стартовые панели
-        mToolboxService.Register<PropertiesToolboxViewModel>();
-        mToolboxService.Register<OutputToolboxViewModel>();
+        // Регистрируем панели модуля (до восстановления workspace)
+        foreach (ToolRegistration tool in module.Tools)
+            mToolboxService.Register(tool.ViewModelType);
+
+        // Собираем меню: пункты модуля + стандартные пункты Shell
+        FileMenuItems = BuildMenuItems("Файл");
+        ToolsMenuItems = BuildMenuItems("Панели инструментов");
+
+        FileMenuItems.Add(new MenuItemViewModel("Сохранить", SaveFileCommand, "Ctrl+S"));
+        FileMenuItems.Add(new MenuItemViewModel("Закрыть документ", CloseDocumentCommand, "Ctrl+W"));
+        FileMenuItems.Add(MenuItemViewModel.Separator());
+        FileMenuItems.Add(new MenuItemViewModel("Выход", ExitCommand));
 
         mLogService.LogInformation("Приложение запущено.");
 
@@ -67,6 +70,29 @@ public sealed partial class MainViewModel : ObservableObject, IWindowLifecycleAw
     }
 
     // --- Пробросы свойств для биндинга ---
+
+    public string AppTitle => mModule.AppTitle;
+
+    /// <summary>Пункты меню «Файл»: модульные + стандартные Shell (см. конструктор).</summary>
+    public ObservableCollection<MenuItemViewModel> FileMenuItems { get; } = [];
+
+    /// <summary>Пункты меню «Панели инструментов» — из модуля.</summary>
+    public ObservableCollection<MenuItemViewModel> ToolsMenuItems { get; } = [];
+
+    private ObservableCollection<MenuItemViewModel> BuildMenuItems(string parentHeader)
+    {
+        var items = new ObservableCollection<MenuItemViewModel>();
+        foreach (MenuRegistration registration in mModule.MenuItems)
+        {
+            if (registration.ParentHeader != parentHeader)
+                continue;
+
+            items.Add(registration.Header is null
+                ? MenuItemViewModel.Separator()
+                : new MenuItemViewModel(registration.Header, registration.Command!, registration.InputGesture));
+        }
+        return items;
+    }
 
     public ObservableCollection<AvalonDocumentViewModel> Documents => mDockWindowService.Documents;
     public AvalonDocumentViewModel? ActiveDocument => mDockWindowService.ActiveDocument;
@@ -106,53 +132,6 @@ public sealed partial class MainViewModel : ObservableObject, IWindowLifecycleAw
 
     // --- Команды ---
 
-    [RelayCommand]
-    private void OpenNewDocument()
-    {
-        var doc = mEditorFactory.CreateNew("Новый документ", $"Содержимое документа.\r\nСоздан: {DateTime.Now:G}");
-
-        mDockWindowService.OpenDocument(doc);
-        mDockWindowService.ActivateDocument(doc);
-
-        mLogService.LogInformation($"Открыт документ: {doc.Title}");
-    }
-
-
-    [RelayCommand]
-    private void OpenFile()
-    {
-        var path = mFileService.ShowOpenDialog();
-        
-        if (path is null)
-            return;
-
-        // 1. Ищем среди открытых документов, приводя к EditorTabViewModel
-        var existing = mDockWindowService.Documents.OfType<EditorTabViewModel>().FirstOrDefault(d => d.FilePath == path);
-
-        if (existing != null)
-        {
-            // Если уже открыт — активируем через сервис
-            mDockWindowService.ActivateDocument(existing);
-            mLogService.LogInformation($"Активирован существующий: {path}");
-            return;
-        }
-
-        try
-        {
-            EditorTabViewModel doc = mEditorFactory.CreateFromFile(path);
-
-            mDockWindowService.OpenDocument(doc);
-            mDockWindowService.ActivateDocument(doc);
-
-            mLogService.LogInformation($"Открыт файл: {path}");
-        }
-        catch (Exception ex)
-        {
-            mLogService.LogError("Не удалось открыть файл", ex);
-            mDialogService.ShowInformation($"Не удалось открыть файл: {ex.Message}", "Ошибка");
-        }
-    }
-
     [RelayCommand(CanExecute = nameof(CanSaveOrClose))]
     private void SaveFile()
     {
@@ -174,14 +153,6 @@ public sealed partial class MainViewModel : ObservableObject, IWindowLifecycleAw
     {
         mMessenger.Send(new OpenSettingsMessage());
     }
-
-    [RelayCommand]
-    private void ToggleProperties() => mToolboxService.Toggle<PropertiesToolboxViewModel>();
-
-    [RelayCommand]
-    private void ToggleOutput() => mToolboxService.Toggle<OutputToolboxViewModel>();
-
-
 
     [RelayCommand]
     private void Exit() => Application.Current.Shutdown();
