@@ -2,9 +2,6 @@
 using AvalonPad.Core.AvalonDock.Model;
 using AvalonPad.Core.AvalonDock.Services;
 using AvalonPad.Core.Services;
-using AvalonPad.Factories;
-using AvalonPad.ViewModels;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.ComponentModel;
 using System.IO;
@@ -22,10 +19,9 @@ public sealed class PersistenceService : IPersistenceService
     private readonly IDockingManagerProvider mDockingManager;
     private readonly ILayoutSerializerService mLayoutSerializer;
     private readonly IWorkspaceService mWorkspaceService;
-    private readonly IEditorTabViewModelFactory mEditorFactory;
+    private readonly IDocumentCatalog mCatalog;
     private readonly IDockWindowService mDockWindowService;
     private readonly ISettingsService mSettingsService;
-    private readonly IServiceProvider mServiceProvider;
     private readonly ILogService<PersistenceService> mLoggerService;
     private readonly string WorkspaceFilePath = string.Empty;
     private readonly string LayoutFilePath = string.Empty;
@@ -36,21 +32,19 @@ public sealed class PersistenceService : IPersistenceService
         IDockingManagerProvider managerProvider,
         ILayoutSerializerService layoutSerializer,
         IWorkspaceService workspaceService,
-        IEditorTabViewModelFactory editorFactory,
+        IDocumentCatalog documentCatalog,
         IDockEventBinder dockEventBinder,
         ISettingsService settingsService,
         IDockWindowService dockWindowService,
-        IServiceProvider serviceProvider,
         IAppPathService appPathService,
         ILogService<PersistenceService> loggerService)
     {
         mDockingManager = managerProvider;
         mLayoutSerializer = layoutSerializer;
         mWorkspaceService = workspaceService;
-        mEditorFactory = editorFactory;
+        mCatalog = documentCatalog;
         mSettingsService = settingsService;
         mDockWindowService = dockWindowService;
-        mServiceProvider = serviceProvider;
         mLoggerService = loggerService;
 
         WorkspaceFilePath = appPathService.WorkspaceFilePath; 
@@ -130,24 +124,23 @@ public sealed class PersistenceService : IPersistenceService
 
         foreach (WorkspaceDocument d in state.Documents)
         {
-            AvalonDocumentViewModel? doc = null;
+            AvalonDocumentViewModel? doc = mCatalog.Create(d.DocumentTypeName);
 
-            // Восстанавливаем в зависимости от типа
-            if (d.DocumentTypeName == typeof(EditorTabViewModel).FullName)
+            if (doc is null)
             {
-                doc = mEditorFactory.LoadDocumentState(d);
-            }
-            else if (d.DocumentTypeName == typeof(SettingsViewModel).FullName)
-            {
-                // Для настроек берём синглтон из DI
-                doc = mServiceProvider.GetRequiredService<SettingsViewModel>();
-                // восстанавливаем динамичные настройки, остальные статичны и смысла их восстанавливать нет
-                doc.IsActive = d.IsActive;
-                doc.IsModified = d.IsModified;
+                mLoggerService.LogWarning($"Документ «{d.Title}» ({d.DocumentTypeName}) не найден в каталоге — пропущен.");
+                continue;
             }
 
-            if (doc != null)
-                mDockWindowService.OpenDocument(doc);
+            // Своё динамическое состояние документ восстанавливает сам (IPersistableDocument),
+            // общие поля — здесь.
+            if (doc is IPersistableDocument persistable)
+                persistable.LoadState(d);
+
+            doc.IsActive = d.IsActive;
+            doc.IsModified = d.IsModified;
+
+            mDockWindowService.OpenDocument(doc);
         }
 
         mLoggerService.LogInformation($"Восстановлено документов: {state.Documents.Count}");
@@ -259,12 +252,9 @@ public sealed class PersistenceService : IPersistenceService
 
             };
 
-            // Если это текстовый редактор — сохраняем текст и путь
-            if (doc is EditorTabViewModel editor)
-            {
-                workspaceDocument.FilePath = string.IsNullOrEmpty(editor.FilePath) ? null : editor.FilePath;
-                workspaceDocument.Content = editor.Content;
-            }
+            // Свои динамические поля документ сохраняет сам (IPersistableDocument)
+            if (doc is IPersistableDocument persistable)
+                persistable.SaveState(workspaceDocument);
 
             state.Documents.Add(workspaceDocument);
         }

@@ -124,6 +124,10 @@ public partial class App : Application
                 // Фабрика для создания документов через DI (вместо new EditorTabViewModel())
                 services.AddSingleton<IEditorTabViewModelFactory, EditorTabViewModelFactory>();
 
+                // Каталог документов: какие типы восстанавливать из workspace.json
+                // (PersistenceService конкретных типов не знает)
+                services.AddSingleton<IDocumentCatalog, DocumentCatalog>();
+
                 // Сервис по управлению документами
                 services.AddSingleton<IDockWindowService, DockWindowService>();
 
