@@ -154,20 +154,26 @@ public interface IAppModule
 Каждый шаг — отдельный рабочий коммит (сборка не рвётся).
 
 1. **Shell создаётся, дубликаты убираются.** Библиотека `AvalonPad.Shell`
-   (`UseWPF`); перенести из App-слоя всё, что не знает про редактор:
-   `PersistenceService`, `WindowLifecycleService`, `Messages`, `Extensions`,
-   `Converters`, `SettingsViewModel/View`, `Output/Properties`. Namespaces
-   сохранить как есть (`AvalonPad.Services` и т.п.) — тогда код приложений
-   компилируется без правок; из клонов дубликаты удаляются, ссылки на Shell
-   добавляются.
+   (`UseWPF`); перенести из App-слоя всё, что не знает про содержимое
+   приложения: `WindowLifecycleService`, `Messages`, `Extensions`,
+   `Converters`, `SettingsViewModel/View`, `Output/Properties`.
+   `PersistenceService` — НЕ на этом шаге: он ссылается на `EditorTabViewModel`
+   (содержимое приложения) и переезжает на шаге 2 вместе с выделением
+   каталога документов. Namespaces сохранить как есть (`AvalonPad.Services`
+   и т.п.) — тогда код компилируется без правок; в XAML добавляются префиксы
+   `shellvm`/`shellviews` с `assembly=AvalonPad.Shell` для переезжающих типов
+   (DataTemplates в App.xaml, конвертеры в MainWindow.xaml).
 2. **Контракт и параметризация.** `IAppModule` в `AvalonPad.Core`;
    редакторные команды (New/Open/Save) вырезаются из `MainViewModel` в модуль;
    меню строится из `MenuItems`; `MainViewModel` и `MainWindow` переезжают в
-   Shell.
+   Shell; вместе с ними — `PersistenceService`, у которого знание о конкретных
+   документах заменяется каталогом (интерфейс-фабрика по ContentId,
+   реализация — в каждом приложении).
 3. **Приложения схлопываются.** AdamPad/WindowPad: `App.xaml(.cs)` + модуль +
    свои документы/панели. Здесь создаются пустые `AdamPad.Core` /
    `WindowPad.Core` (csproj + ссылка на `AvalonPad.Core`) — прирост
-   функциональности дальше идёт в них.
+   функциональности дальше идёт в них. Здесь же — разделение настроек
+   (см. п. 7.4).
 4. **`src/AvalonPad` удаляется** — только после того, как оба приложения
    собраны и поведенчески равны прототипу. До этого он остаётся эталоном.
 5. **Косметика:** раскладка `base/`/`apps/`, актуализация README (см.
@@ -178,14 +184,43 @@ public interface IAppModule
 - **Generic-наследование WPF не использовать:** `x:Class` не умеет наследовать
   `Window<T>`/`UserControl<T>`. Параметризация — контракты и DataTemplates.
 - **Порядок DI:** модуль до restore workspace (см. п. 4).
-- **AppSettings общий:** поля `EditorFont*` пока живут в общей настройке —
-  приемлемо; отдельные секции настроек на приложение (`ISettingsSection`) —
-  позже, по реальной потребности.
+- **AppSettings — базовый класс:** наследование и разделение настроек —
+  п. 7.4.
 - **ContentId** уникальны внутри приложения; layout-файлы у приложений свои
   (`%AppData%/AdamPad`, `%AppData%/WindowPad` — AppPathService берёт имя из
   сборки).
 - **Не переименовывать namespaces на старте миграции** — нулевой дифф по
   потребителям; переименование — отдельное решение, не частью переезда.
+
+### 7.4. Настройки по приложениям (выполняется на шаге 3)
+
+Решено: у каждого приложения — свой класс настроек, наследующий общий.
+Существующий код почти готов, нужны три правки:
+
+1. `AppSettings` (AvalonPad.Core) — снять `sealed`; оставить в нём только
+   общие секции: тема, окно (Width/Height/IsMaximized), логи (путь, лимиты,
+   шаблон, уровни). Поля `EditorFont*` временно остаются здесь (клоны пока
+   содержат редактор); при расхождении приложений — переехать в настройки
+   приложения, где останется редактор.
+2. `SettingsService`: принимать экземпляр в конструкторе
+   (`SettingsService(AppSettings current, IAppPathService paths)`) вместо
+   `Current { get; } = new()`; отражение `typeof(AppSettings)` заменить на
+   `Current.GetType()` в Load и Save — производные свойства подхватятся
+   автоматически, контракт сериализации не меняется (JSON per-app уже в
+   `%AppData%/<имя сборки>/`).
+3. DI (в каждом приложении):
+   `services.AddSingleton<AdamPadSettings>();`
+   `services.AddSingleton<ISettingsService>(sp => new SettingsService(
+       sp.GetRequiredService<AdamPadSettings>(),
+       sp.GetRequiredService<IAppPathService>()));`
+   Сервисы робота инжектят `AdamPadSettings` напрямую — это тот же инстанс,
+   что и за `ISettingsService.Current`. Обобщённый `SettingsService<T>` не
+   нужен: Shell работает с интерфейсом через базовый тип, а резолв по
+   интерфейсу с несколькими экземплярами был бы головной болью.
+
+Пока сервис правится, рассмотреть попутную фиксацию из ревью §3.1:
+`mErrorConfigProperties.Add` на дубликате ключа роняет загрузку — заменить
+на `TryAdd` (и/или логировать) в том же коммите.
 
 ## 9. Принятые решения и открытые вопросы
 
@@ -195,6 +230,12 @@ public interface IAppModule
 - Строгая версия зависимостей: app-Core → `AvalonPad.Core`; Shell остаётся
   выше домена. Ссылка `app-Core → Shell` не добавляется; если появится законный
   кейс — изменить правило осознанно.
+- Shell не ссылается на приложения и не знает их типы в компиляции: контент
+  приходит через DI (`IAppModule`) и DataTemplates в App.xaml приложения
+  (уже так работает). Ссылки — вниз, данные — вверх.
+- Настройки: общее в `AppSettings` (Core), специфичное — в классах
+  `<App>Settings : AppSettings` в app-Core; `SettingsService` принимает
+  экземпляр и отражается по `Current.GetType()` (см. п. 7.4).
 - Открытие документов — через сервис оболочки, не напрямую из модулей.
 - `OutputTool`/`PropertiesTool` — временно Shell (решение ревизии: если они
   окажутся специфичными, переехать в модули на шаге 3).

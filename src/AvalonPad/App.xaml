@@ -3,6 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:AvalonPad.ViewModels"
              xmlns:views="clr-namespace:AvalonPad.Views"
+             xmlns:shellvm="clr-namespace:AvalonPad.ViewModels;assembly=AvalonPad.Shell"
+             xmlns:shellviews="clr-namespace:AvalonPad.Views;assembly=AvalonPad.Shell"
              ShutdownMode="OnMainWindowClose">
 
     <Application.Resources>
@@ -15,16 +17,16 @@
             <views:EditorTabView />
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type vm:PropertiesToolboxViewModel}">
-            <views:PropertiesToolView />
+        <DataTemplate DataType="{x:Type shellvm:PropertiesToolboxViewModel}">
+            <shellviews:PropertiesToolView />
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type vm:OutputToolboxViewModel}">
-            <views:OutputToolView />
+        <DataTemplate DataType="{x:Type shellvm:OutputToolboxViewModel}">
+            <shellviews:OutputToolView />
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
-            <views:SettingsView />
+        <DataTemplate DataType="{x:Type shellvm:SettingsViewModel}">
+            <shellviews:SettingsView />
         </DataTemplate>
 
     </Application.Resources>

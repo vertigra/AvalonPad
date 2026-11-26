@@ -7,7 +7,7 @@
         xmlns:docking="clr-namespace:AvalonPad.Core.AvalonDock.Docking;assembly=AvalonPad.Core.AvalonDock"
         xmlns:styles="clr-namespace:AvalonPad.Core.AvalonDock.Styles;assembly=AvalonPad.Core.AvalonDock"
         xmlns:local="clr-namespace:AvalonPad"
-        xmlns:converters="clr-namespace:AvalonPad.Converters"
+        xmlns:converters="clr-namespace:AvalonPad.Converters;assembly=AvalonPad.Shell"
         xmlns:vm="clr-namespace:AvalonPad.ViewModels"
         Title="AvalonPad"
         Height="700" Width="1100"
