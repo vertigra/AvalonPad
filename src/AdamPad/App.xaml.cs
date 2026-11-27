@@ -1,11 +1,14 @@
 using AvalonPad.Core.AvalonDock.Services;
+using AvalonPad.Core.Models;
 using AvalonPad.Core.Services;
 using AvalonPad.Core.Services.AvalonDock;
-using AdamPad.Extensions;
 using AdamPad.Factories;
 using AdamPad.Services;
+using AvalonPad.Shell.Extensions;
+using AvalonPad.Shell.Services;
+using AvalonPad.Shell.ViewModels;
+using AvalonPad.Shell.Views;
 using AdamPad.ViewModels;
-using AdamPad.Views;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -123,6 +126,13 @@ public partial class App : Application
 
                 // Фабрика для создания документов через DI (вместо new EditorTabViewModel())
                 services.AddSingleton<IEditorTabViewModelFactory, EditorTabViewModelFactory>();
+
+                // Каталог документов: какие типы восстанавливать из workspace.json
+                // (PersistenceService конкретных типов не знает)
+                services.AddSingleton<IDocumentCatalog, DocumentCatalog>();
+
+                // Контракт модуля: Shell знает только интерфейс IAppModule
+                services.AddSingleton<IAppModule, AdamPadModule>();
 
                 // Сервис по управлению документами
                 services.AddSingleton<IDockWindowService, DockWindowService>();
