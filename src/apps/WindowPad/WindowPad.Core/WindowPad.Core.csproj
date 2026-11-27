@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AvalonPad.Core\AvalonPad.Core.csproj" />
+    <ProjectReference Include="..\..\..\base\AvalonPad.Core\AvalonPad.Core.csproj" />
   </ItemGroup>
 
 </Project>

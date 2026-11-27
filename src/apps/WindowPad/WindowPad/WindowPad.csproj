@@ -9,9 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AvalonPad.Core\AvalonPad.Core.csproj" />
-    <ProjectReference Include="..\AdamPad.Core\AdamPad.Core.csproj" />
-    <ProjectReference Include="..\AvalonPad.Shell\AvalonPad.Shell.csproj" />
+    <ProjectReference Include="..\..\..\base\AvalonPad.Core\AvalonPad.Core.csproj" />
+    <ProjectReference Include="..\WindowPad.Core\WindowPad.Core.csproj" />
+    <ProjectReference Include="..\..\..\base\AvalonPad.Shell\AvalonPad.Shell.csproj" />
   </ItemGroup>
 
 </Project>
