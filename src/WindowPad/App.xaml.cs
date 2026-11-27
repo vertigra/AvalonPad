@@ -45,7 +45,7 @@ public partial class App : Application
             mLoadException = ex;
         }
 
-        var settings = settingsService.Current;
+        var currentSettings = settingsService.Current;
 
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Verbose()
