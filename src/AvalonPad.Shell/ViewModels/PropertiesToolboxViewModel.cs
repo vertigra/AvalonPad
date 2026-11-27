@@ -2,7 +2,7 @@ using AvalonDock.Layout;
 using AvalonPad.Core.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace AvalonPad.ViewModels;
+namespace AvalonPad.Shell.ViewModels;
 
 /// <summary>
 /// Панель «Свойства» — закрепляется справа.

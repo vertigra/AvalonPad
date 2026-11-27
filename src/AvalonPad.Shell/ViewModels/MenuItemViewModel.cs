@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 
-namespace AvalonPad.ViewModels;
+namespace AvalonPad.Shell.ViewModels;
 
 /// <summary>
 /// Элемент меню для привязки (Shell). Header == null — разделитель.

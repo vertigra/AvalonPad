@@ -1,22 +1,19 @@
+using AvalonPad.Core.AvalonDock.Model;
 using AvalonPad.Core.AvalonDock.Services;
 using AvalonPad.Core.AvalonDock.ViewModels;
-using AvalonPad.Core.Services.AvalonDock;
 using AvalonPad.Core.Models;
 using AvalonPad.Core.Services;
-using AvalonPad.Messages;
-using AvalonPad.Services;
+using AvalonPad.Core.Services.AvalonDock;
+using AvalonPad.Shell.Messages;
+using AvalonPad.Shell.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Windows;
-using AvalonPad.Core.AvalonDock.Model;
 
-namespace AvalonPad.ViewModels;
+namespace AvalonPad.Shell.ViewModels;
 
 public sealed partial class MainViewModel : ObservableObject, IWindowLifecycleAware
 {

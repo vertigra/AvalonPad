@@ -2,6 +2,7 @@ using AvalonPad.Core.AvalonDock.Services;
 using AvalonPad.Core.Models;
 using AvalonPad.Core.Services;
 using AvalonPad.Factories;
+using AvalonPad.Shell.ViewModels;
 using AvalonPad.ViewModels;
 using CommunityToolkit.Mvvm.Input;
 using System;

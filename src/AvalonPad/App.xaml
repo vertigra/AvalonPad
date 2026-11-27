@@ -3,8 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:AvalonPad.ViewModels"
              xmlns:views="clr-namespace:AvalonPad.Views"
-             xmlns:shellvm="clr-namespace:AvalonPad.ViewModels;assembly=AvalonPad.Shell"
-             xmlns:shellviews="clr-namespace:AvalonPad.Views;assembly=AvalonPad.Shell"
+             xmlns:shellvm="clr-namespace:AvalonPad.Shell.ViewModels;assembly=AvalonPad.Shell"
+             xmlns:shellviews="clr-namespace:AvalonPad.Shell.Views;assembly=AvalonPad.Shell"
              ShutdownMode="OnMainWindowClose">
 
     <Application.Resources>

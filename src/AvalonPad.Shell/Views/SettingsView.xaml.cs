@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace AvalonPad.Views;
+namespace AvalonPad.Shell.Views;
 
 public partial class SettingsView : UserControl
 {

@@ -1,3 +1,3 @@
-﻿namespace AvalonPad.Messages;
+﻿namespace AvalonPad.Shell.Messages;
 
 public record OpenSettingsMessage();

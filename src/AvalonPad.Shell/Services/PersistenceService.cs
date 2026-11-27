@@ -1,16 +1,13 @@
-﻿using AvalonPad.Core.AvalonDock.ViewModels;
-using AvalonPad.Core.AvalonDock.Model;
+﻿using AvalonPad.Core.AvalonDock.Model;
 using AvalonPad.Core.AvalonDock.Services;
+using AvalonPad.Core.AvalonDock.ViewModels;
 using AvalonPad.Core.Services;
-using System;
 using System.ComponentModel;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
-namespace AvalonPad.Services;
+namespace AvalonPad.Shell.Services;
 
 public sealed class PersistenceService : IPersistenceService
 {

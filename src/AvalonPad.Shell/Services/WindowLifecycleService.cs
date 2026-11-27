@@ -1,9 +1,8 @@
-using System;
-using System.Windows;
 using AvalonDock;
 using AvalonPad.Core.AvalonDock.Services;
+using System.Windows;
 
-namespace AvalonPad.Services;
+namespace AvalonPad.Shell.Services;
 
 /// <summary>
 /// Контракт для ViewModel, которая хочет получать уведомления о

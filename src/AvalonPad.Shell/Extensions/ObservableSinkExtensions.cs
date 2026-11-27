@@ -5,7 +5,7 @@ using Serilog.Events;
 using System.Collections.ObjectModel;
 using System.Windows;
 
-namespace AvalonPad.Extensions;
+namespace AvalonPad.Shell.Extensions;
 
 public sealed class ObservableSink : ILogEventSink
 {

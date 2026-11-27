@@ -1,8 +1,7 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Windows.Data;
 
-namespace AvalonPad.Converters;
+namespace AvalonPad.Shell.Converters;
 
 /// <summary>
 /// Конвертер для отметки галочкой текущей темы в меню.

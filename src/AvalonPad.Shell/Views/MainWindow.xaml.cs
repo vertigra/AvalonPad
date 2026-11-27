@@ -1,8 +1,9 @@
-using System.Windows;
-using AvalonPad.ViewModels;
-using AvalonPad.Services;
 
-namespace AvalonPad.Views;
+using AvalonPad.Shell.Services;
+using AvalonPad.Shell.ViewModels;
+using System.Windows;
+
+namespace AvalonPad.Shell.Views;
 
 /// <summary>
 /// Code-behind минимален: только установка DataContext из DI
@@ -14,6 +15,7 @@ public partial class MainWindow : Window
     public MainWindow(MainViewModel viewModel, IWindowLifecycleService lifecycle)
     {
         DataContext = viewModel;
+
         InitializeComponent();
 
         lifecycle.Attach(this, dockManager);

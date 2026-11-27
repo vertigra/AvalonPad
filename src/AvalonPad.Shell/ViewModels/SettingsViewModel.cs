@@ -1,7 +1,7 @@
 ﻿using AvalonPad.Core.AvalonDock.Services;
 using AvalonPad.Core.Services;
 using AvalonPad.Core.ViewModels;
-using AvalonPad.Messages;
+using AvalonPad.Shell.Messages;
 using CommunityToolkit.Mvvm.Messaging;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows.Media;
 
-namespace AvalonPad.ViewModels;
+namespace AvalonPad.Shell.ViewModels;
 
 public sealed class SettingsViewModel : BaseDocumentViewModel, IRecipient<OpenSettingsMessage>
 {

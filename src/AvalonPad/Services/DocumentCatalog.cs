@@ -1,5 +1,6 @@
 using AvalonPad.Core.AvalonDock.ViewModels;
 using AvalonPad.Core.Services;
+using AvalonPad.Shell.ViewModels;
 using AvalonPad.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using System;

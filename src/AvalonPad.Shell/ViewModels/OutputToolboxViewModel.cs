@@ -3,7 +3,7 @@ using AvalonPad.Core.Services;
 using AvalonPad.Core.ViewModels;
 using System.Collections.ObjectModel;
 
-namespace AvalonPad.ViewModels;
+namespace AvalonPad.Shell.ViewModels;
 
 /// <summary>
 /// Панель «Вывод» — закрепляется снизу, логирует сообщения приложения.
