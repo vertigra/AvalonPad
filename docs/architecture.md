@@ -171,7 +171,7 @@ public interface IAppModule
      конкретных документах заменяется каталогом `IDocumentCatalog` +
      `IPersistableDocument` (контракт — в `Core.AvalonDock`, реализация — в
      приложении, регистрация — в `DocumentCatalog`).
-   - **2б (этот шаг):** `IAppModule` в `AvalonPad.Core`; редакторные команды
+   - **2б (выполнен):** `IAppModule` в `AvalonPad.Core`; редакторные команды
      (New/Open) вырезаются из `MainViewModel` в модуль (`AvalonPadModule`);
      «Сохранить»/«Закрыть» остаются в Shell — они работают с любым документом;
      меню «Файл»/«Панели инструментов» — из `MenuItems` модуля, «Настройки» и
@@ -199,6 +199,12 @@ public interface IAppModule
   сборки).
 - **Не переименовывать namespaces на старте миграции** — нулевой дифф по
   потребителям; переименование — отдельное решение, не частью переезда.
+  Итог: Shell переименован отдельным коммитом 27.11 (`AvalonPad.Shell.*` —
+  одна сборка — свои namespaces, нет двойных имён с приложением);
+  `src/AvalonPad` остаётся на `AvalonPad.*` до удаления; клоны уже на
+  `AdamPad.*`/`WindowPad.*` (заданы при создании). Побочный эффект:
+  workspace.json со старым именем SettingsViewModel восстановится без этой
+  вкладки — каталог (шаг 2а) пропустит неизвестный тип с предупреждением.
 
 ### 7.4. Настройки по приложениям (выполняется на шаге 3)
 
@@ -251,8 +257,9 @@ public interface IAppModule
 Открыто:
 - Название общей библиотеки: `AvalonPad.Shell` — рабочее; окончательное имя
   закрепить при создании проекта.
-- Механика команд меню (`MenuRegistration`: Command vs delegate) — уточнить на
-  шаге 2 по фактической структуре `MainViewModel`.
+- Механика команд меню: решена на шаге 2б — `MenuRegistration(Header, Command,
+  InputGesture, ParentHeader)` + `MenuItemViewModel` в Shell; разделитель —
+  `Header == null`.
 
 ---
 

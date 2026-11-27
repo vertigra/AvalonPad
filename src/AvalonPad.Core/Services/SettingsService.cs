@@ -82,7 +82,8 @@ public sealed partial class SettingsService : ObservableObject, ISettingsService
                 catch (Exception ex)
                 {
 
-                    mErrorConfigProperties.Add(jsonProp.Name, ex.Message);
+                    if (!mErrorConfigProperties.TryAdd(jsonProp.Name, ex.Message))
+                        Log.Warning("Настройка {propertyName} уже помечена ошибкой", jsonProp.Name);
                 }
             }
 
