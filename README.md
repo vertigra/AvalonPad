@@ -213,7 +213,7 @@ OutputToolboxViewModel : BaseToolboxViewModel     (PreferredSide=Bottom)
 ```text
 App()
 ├── new AppPathService()                          — AppDataDirectory (с fallback на %Temp%)
-├── new SettingsService(appPathService)           — берёт путь из IAppPathService
+├── new SettingsService(settings, appPathService)  — настройки приложения (AdamPadSettings/WindowPadSettings/AppSettings)
 ├── settingsService.Load()                        — при отсутствии файла: IsFirstRun=true, Save() пишет дефолты
 │                                                  — при ошибке парсинга поля: Dictionary<имя, ошибка>
 │                                                  — при прочих исключениях: ловим в mLoadException

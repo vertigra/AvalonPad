@@ -2,6 +2,7 @@ using AvalonPad.Core.AvalonDock.Services;
 using AvalonPad.Core.Models;
 using AvalonPad.Core.Services;
 using AvalonPad.Core.Services.AvalonDock;
+using WindowPad.Core.Models;
 using WindowPad.Factories;
 using WindowPad.Services;
 using AvalonPad.Shell.Extensions;
@@ -32,7 +33,8 @@ public partial class App : Application
     {
         AppPathService appPathService = new();
         
-        SettingsService settingsService = new(appPathService);
+        WindowPadSettings settings = new();
+        SettingsService settingsService = new(settings, appPathService);
 
         try
         {
@@ -81,6 +83,7 @@ public partial class App : Application
             .ConfigureServices((_, services) =>
             {
                 services.AddSingleton<IAppPathService>(appPathService);
+                services.AddSingleton<WindowPadSettings>(settings);
                 services.AddSingleton<ISettingsService>(settingsService);
 
                 // Serilog.ILogger — глобальный логер

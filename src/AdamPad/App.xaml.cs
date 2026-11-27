@@ -2,6 +2,7 @@ using AvalonPad.Core.AvalonDock.Services;
 using AvalonPad.Core.Models;
 using AvalonPad.Core.Services;
 using AvalonPad.Core.Services.AvalonDock;
+using AdamPad.Core.Models;
 using AdamPad.Factories;
 using AdamPad.Services;
 using AvalonPad.Shell.Extensions;
@@ -32,7 +33,8 @@ public partial class App : Application
     {
         AppPathService appPathService = new();
         
-        SettingsService settingsService = new(appPathService);
+        AdamPadSettings settings = new();
+        SettingsService settingsService = new(settings, appPathService);
 
         try
         {
@@ -81,6 +83,7 @@ public partial class App : Application
             .ConfigureServices((_, services) =>
             {
                 services.AddSingleton<IAppPathService>(appPathService);
+                services.AddSingleton<AdamPadSettings>(settings);
                 services.AddSingleton<ISettingsService>(settingsService);
 
                 // Serilog.ILogger — глобальный логер

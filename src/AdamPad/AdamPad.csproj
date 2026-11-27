@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AvalonPad.Core\AvalonPad.Core.csproj" />
+    <ProjectReference Include="..\AdamPad.Core\AdamPad.Core.csproj" />
     <ProjectReference Include="..\AvalonPad.Shell\AvalonPad.Shell.csproj" />
   </ItemGroup>
 

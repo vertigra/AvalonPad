@@ -32,7 +32,7 @@ public partial class App : Application
     {
         AppPathService appPathService = new();
         
-        SettingsService settingsService = new(appPathService);
+        SettingsService settingsService = new(new AppSettings(), appPathService);
 
         try
         {

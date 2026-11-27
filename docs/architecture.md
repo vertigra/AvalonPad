@@ -177,11 +177,10 @@ public interface IAppModule
      меню «Файл»/«Панели инструментов» — из `MenuItems` модуля, «Настройки» и
      подменю «Темы» — статические в Shell; панели — из `Tools`;
      `MainViewModel` и `MainWindow` переезжают в Shell.
-3. **Приложения схлопываются.** AdamPad/WindowPad: `App.xaml(.cs)` + модуль +
-   свои документы/панели. Здесь создаются пустые `AdamPad.Core` /
-   `WindowPad.Core` (csproj + ссылка на `AvalonPad.Core`) — прирост
-   функциональности дальше идёт в них. Здесь же — разделение настроек
-   (см. п. 7.4).
+3. **Приложения схлопываются (выполнено, шаги 3а–3в).** AdamPad/WindowPad:
+   `App.xaml(.cs)` + модуль + свои документы/панели; созданы пустые
+   `AdamPad.Core` / `WindowPad.Core` (csproj + ссылка на `AvalonPad.Core`);
+   настройки разделены (п. 7.4).
 4. **`src/AvalonPad` удаляется** — только после того, как оба приложения
    собраны и поведенчески равны прототипу. До этого он остаётся эталоном.
 5. **Косметика:** раскладка `base/`/`apps/`, актуализация README (см.
@@ -206,7 +205,7 @@ public interface IAppModule
   workspace.json со старым именем SettingsViewModel восстановится без этой
   вкладки — каталог (шаг 2а) пропустит неизвестный тип с предупреждением.
 
-### 7.4. Настройки по приложениям (выполняется на шаге 3)
+### 7.4. Настройки по приложениям (выполнено на шаге 3в)
 
 Решено: у каждого приложения — свой класс настроек, наследующий общий.
 Существующий код почти готов, нужны три правки:
@@ -222,19 +221,27 @@ public interface IAppModule
    `Current.GetType()` в Load и Save — производные свойства подхватятся
    автоматически, контракт сериализации не меняется (JSON per-app уже в
    `%AppData%/<имя сборки>/`).
-3. DI (в каждом приложении):
-   `services.AddSingleton<AdamPadSettings>();`
-   `services.AddSingleton<ISettingsService>(sp => new SettingsService(
-       sp.GetRequiredService<AdamPadSettings>(),
-       sp.GetRequiredService<IAppPathService>()));`
+3. DI (в каждом приложении) — экземпляр создаётся в конструкторе `App()`
+   до построения хоста, потому что логгеру нужны уровни из `Load()`:
+
+   ```csharp
+   AdamPadSettings settings = new();
+   SettingsService settingsService = new(settings, appPathService);
+
+   services.AddSingleton<AdamPadSettings>(settings);
+   services.AddSingleton<ISettingsService>(settingsService);
+   ```
+
    Сервисы робота инжектят `AdamPadSettings` напрямую — это тот же инстанс,
    что и за `ISettingsService.Current`. Обобщённый `SettingsService<T>` не
    нужен: Shell работает с интерфейсом через базовый тип, а резолв по
    интерфейсу с несколькими экземплярами был бы головной болью.
 
-Пока сервис правится, рассмотреть попутную фиксацию из ревью §3.1:
-`mErrorConfigProperties.Add` на дубликате ключа роняет загрузку — заменить
-на `TryAdd` (и/или логировать) в том же коммите.
+   Классы `AdamPadSettings`/`WindowPadSettings` живут в новых пустых
+   `AdamPad.Core`/`WindowPad.Core` (csproj + ссылка на `AvalonPad.Core`),
+   namespace `{App}.Core.Models`.
+
+Фиксация из ревью §3.1 (`TryAdd`) выполнена отдельным шагом 3а.
 
 ## 9. Принятые решения и открытые вопросы
 
@@ -249,10 +256,11 @@ public interface IAppModule
   (уже так работает). Ссылки — вниз, данные — вверх.
 - Настройки: общее в `AppSettings` (Core), специфичное — в классах
   `<App>Settings : AppSettings` в app-Core; `SettingsService` принимает
-  экземпляр и отражается по `Current.GetType()` (см. п. 7.4).
+  экземпляр и отражается по `Current.GetType()`. Выполнено на шаге 3в
+  (п. 7.4).
 - Открытие документов — через сервис оболочки, не напрямую из модулей.
-- `OutputTool`/`PropertiesTool` — временно Shell (решение ревизии: если они
-  окажутся специфичными, переехать в модули на шаге 3).
+- `OutputTool`/`PropertiesTool` — в Shell; если окажутся специфичными —
+  переехать в модули.
 
 Открыто:
 - Название общей библиотеки: `AvalonPad.Shell` — рабочее; окончательное имя

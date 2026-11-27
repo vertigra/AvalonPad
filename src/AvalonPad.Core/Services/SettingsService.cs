@@ -34,16 +34,18 @@ public sealed partial class SettingsService : ObservableObject, ISettingsService
     private readonly string mSettingsFilePath;
 
     /// <summary>
-    /// Загружает сервис с настройками по умолчанию, для загрузки настроек из файла следует использовать Load()
+    /// Принимает экземпляр настроек приложения (наследник AppSettings).
+    /// Загрузка из файла — через Load().
     /// </summary>
-    public SettingsService(IAppPathService appPathService)
+    public SettingsService(AppSettings current, IAppPathService appPathService)
     {
+        Current = current;
         mSettingsFilePath = appPathService.SettingsFilePath;
         Current.PropertyChanged += OnSettingChanged;
     }
 
     public bool IsFirstRun { get; private set; }
-    public AppSettings Current { get; } = new();
+    public AppSettings Current { get; }
     public LoggingLevelSwitch GlobalLevelSwitch { get; } = new(LogEventLevel.Debug);
     public LoggingLevelSwitch OutputPanelSwitch { get; } = new(LogEventLevel.Information);
 
@@ -68,7 +70,7 @@ public sealed partial class SettingsService : ObservableObject, ISettingsService
 
         if (doc.RootElement.TryGetProperty("App", out var app))
         {
-            var props = typeof(AppSettings).GetProperties();
+            var props = Current.GetType().GetProperties();
 
             foreach (JsonProperty jsonProp in app.EnumerateObject())
             {
@@ -107,7 +109,7 @@ public sealed partial class SettingsService : ObservableObject, ISettingsService
                 writer.WriteStartObject();
                 writer.WriteStartObject("App");
 
-                var props = typeof(AppSettings).GetProperties();
+                var props = Current.GetType().GetProperties();
                 foreach (var prop in props)
                 {
                     // Пропускаем индексаторы, если они вдруг появятся в классе

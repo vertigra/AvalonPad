@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace AvalonPad.Core.Models;
 
-public sealed partial class AppSettings : ObservableObject
+public partial class AppSettings : ObservableObject
 {
     // ===== ПРИЛОЖЕНИЕ =====
 
